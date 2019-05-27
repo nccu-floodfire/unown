@@ -30,6 +30,6 @@ class EncoderController extends Controller
             return( ['article_id' => $article_id,
                     'is_answered' => in_array($article_id, $result_list)] );
         }, $article_list);
-        return(view('answerSheet', compact($encoderUuid, $question_list)));
+        return(view('answerSheet', compact('encoderUuid', 'question_list')));
     }
 }
