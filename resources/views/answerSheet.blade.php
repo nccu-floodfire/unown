@@ -40,22 +40,34 @@
                         <label >消息來源本名</label>
                         <textarea class="form-control" rows="1" id="quote_actual" placeholder="{消息來源本名}"></textarea>
                         <label >引述對象位置</label>
-                        <label class="radio-inline"><input type="radio" name="optradio" checked value=0>0（切分單位前）</label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=0>0（切分單位前）</label>
                         <label class="radio-inline"><input type="radio" name="optradio" value=1>1（切分單位中）</label>
                         <label class="radio-inline"><input type="radio" name="optradio" value=2>2（切分單位後）</label>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=3>無</label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=3 checked>無</label>
                     </div>
-                    <button type="button" onclick = "send_result()" class="btn btn-primary">送出</button>
+                    <button type="button" onclick = "send_result()" class="btn btn-primary" id = 'new_btn'>新增結果</button>
+                    <button type="button" onclick = "update_result()" class="btn btn-primary" id = 'update_btn' style='display:none;'>修改結果</button>
+                    <br>
+                    <div id='current_result'>已有作答：</div>
+                    <div id="result_buttons">
+                    </div>
                 </div>
             </div>
         </div>       
 
        <script> 
+        // 該編碼者代碼
         var encoderUuid = {!!json_encode($encoderUuid) !!};
+        // 要回答的問題集
         var question_list = {!! json_encode($question_list) !!};
+        // 當前問題是問題集的哪一個位置
         var question_pos = -1
+        // 問題總數
         var item_sum
+        // 當前問題內容
         var current_item = null
+        // 當前回應是回應集的哪一個位置
+        var result_idx = -1
 
         window.onload = function () {
             var items = document.getElementById('bar_items')
@@ -63,48 +75,66 @@
             for( var i=0; i<item_sum; i++) {
                 question = question_list[i]
                 var tmplist = document.createElement("li");
-                tmplist.innerText = question['article_id']
+                tmplist.innerText = question['article_id']+ '(' + question['answer_time'] +')'
                 tmplist.value = i
                 tmplist.setAttribute('onclick','switch_object(this);'); // for FF
                 tmplist.onclick = function() {switch_object(this);}; // for IE
+                tmplist.classList.add('question_btn')
                 if(question['is_answered']) {
                     tmplist.classList.add('has_answered')
                 } else {
                     tmplist.classList.add('not_answered')
+                    // 當前尚未回答過的第一題
                     if (question_pos < 0) {
                         question_pos = i
+                        tmplist.classList.add('answering')
                     }
                 }
                 items.appendChild(tmplist)
             }
-            //如果都回答過了，則回到第一題
+            // 如果都回答過了，則回到第一題
             if (question_pos < 0) {
                 question_pos = 0
             }
-            //載入題目
+            // 載入題目
             current_article_id = question_list[question_pos]['article_id']
             update_object(current_article_id)
         }
         
+        //按下題目按鈕，修改題目
         function switch_object(obj) {
+            var current_btn = document.getElementsByClassName('question_btn')[question_pos]
+            current_btn.classList.remove('answering')
             question_pos = obj.value
+            current_btn = document.getElementsByClassName('question_btn')[question_pos]
+            current_btn.classList.add('answering')
             current_article_id = question_list[question_pos]['article_id']
             update_object(current_article_id)
         }
 
+        //更新表單內容
         function update_object(article_id) {
             axios.get('/api/encoders/'+encoderUuid+'/articles/'+article_id)
             .then(function (response) {
                 console.log('load_object '+article_id + ' '+response.status)
                 if(response.status == 200) {
+                    // 填入內容
                     current_item = response.data
                     document.getElementById('origin').innerText = current_item.article.body
                     document.getElementById('quote_content').innerText = ''
                     document.getElementById('quote_origin').innerText = ''
                     document.getElementById('quote_actual').value = ''
-                    document.getElementsByName('optradio')['0'].checked = true
-                    if(current_item.result != null) {
-                        fill_the_result()
+                    document.getElementsByName('optradio')['3'].checked = true
+                    // 清空回應列+回應指標歸-1
+                    var button_area = document.getElementById('result_buttons')
+                    while (button_area.firstChild) {
+                        button_area.firstChild.remove()
+                    }
+                    result_idx = -1
+
+                    if(current_item.result.length > 0) {
+                        // 如果該題已經有回答過，則產生回答列表按鈕
+                        create_result_button()
                     }
                 } else {
                     alert('載入題目錯誤')
@@ -115,23 +145,74 @@
             });
         }
 
-        function fill_the_result(){
-            var result = current_item.result
-            document.getElementById('quote_content').innerText = result['quote_content']
-            document.getElementById('quote_origin').innerText = result['quote_origin']
-            document.getElementById('quote_actual').value = result['quote_actual']
-            if (result['quote_pos'] == 3 || result['quote_pos'] == null) {
-                document.getElementsByName('optradio')['3'].checked = true
-            } else {
-                document.getElementsByName('optradio')[result['quote_pos']].checked = true
+        //創建回答按鈕
+        function create_result_button() {
+            var button_area = document.getElementById('result_buttons');
+            var results = current_item.result
+            // 創建清空按鈕，以0代表
+            var tmpbtn = document.createElement("button");
+            tmpbtn.type = 'button'
+            tmpbtn.value = 0
+            tmpbtn.classList.add('btn')
+            tmpbtn.classList.add('btn-warning')
+            tmpbtn.innerText = '清空'
+            tmpbtn.setAttribute('onclick','fill_the_result(this);'); // for FF
+            tmpbtn.onclick = function() {fill_the_result(this);}; // for IE
+            button_area.appendChild(tmpbtn)
+
+            // 依序創建已回應的回應按鈕，以1開始
+            for (var i = 0; i < results.length; i++) {
+                var tmpbtn = document.createElement("button");
+                tmpbtn.type = 'button'
+                tmpbtn.value = i+1
+                tmpbtn.classList.add('btn')
+                tmpbtn.classList.add('btn-warning')
+                tmpbtn.innerText = i+1
+                tmpbtn.setAttribute('onclick','fill_the_result(this);'); // for FF
+                tmpbtn.onclick = function() {fill_the_result(this);}; // for IE
+                button_area.appendChild(tmpbtn)
             }
         }
 
-        function send_result(){
-            send_answer(question_list[question_pos].article_id)
+        //根據按鈕替換當前的回答內容
+        function fill_the_result(result_btn){
+            result_idx = result_btn.value
+            if(result_idx == 0){
+                //  清空按鈕
+                document.getElementById('update_btn').style.display = 'none'
+                document.getElementById('current_result').innerText = '已有作答：'
+                document.getElementById('quote_content').innerText = ''
+                document.getElementById('quote_origin').innerText = ''
+                document.getElementById('quote_actual').value = ''
+                document.getElementsByName('optradio')['3'].checked = true
+            } else {
+                //  匯入回應內容
+                document.getElementById('update_btn').style.display = ''
+                document.getElementById('current_result').innerText = '已有作答：(當前匯入'+result_idx+'）'
+                var result = current_item.result[result_idx-1] // 因為從1開始，故需要減少1才會是array的位置
+                document.getElementById('quote_content').innerText = result['quote_content']
+                document.getElementById('quote_origin').innerText = result['quote_origin']
+                document.getElementById('quote_actual').value = result['quote_actual']
+                if (result['quote_pos'] == 3 || result['quote_pos'] == null) {
+                    document.getElementsByName('optradio')['3'].checked = true
+                } else {
+                    document.getElementsByName('optradio')[result['quote_pos']].checked = true
+                }
+            }
         }
 
-        function send_answer(article_id) {
+        //新增一筆結果
+        function send_result(){
+            send_answer(question_list[question_pos].article_id, null)
+        }
+
+        //更新當前結果
+        function update_result(){
+            send_answer(question_list[question_pos].article_id, current_item.result[result_idx-1].id)
+        }
+
+        //新增or修改一筆結果
+        function send_answer(article_id, result_id) {
             var quote_content = document.getElementById('quote_content').innerText
             var quote_origin = document.getElementById('quote_origin').innerText
             var quote_actual = document.getElementById('quote_actual').value
@@ -146,24 +227,27 @@
             if(quote_pos=='3'){
                 quote_pos = null
             }
-            console.log(quote_pos)
+
             axios.post('/api/encoders/'+encoderUuid+'/articles/'+article_id, {
                 //取得表單內容並送出
                 quote_content: quote_content,
                 quote_origin: quote_origin,
                 quote_actual: quote_actual,
-                quote_pos : quote_pos
+                quote_pos : quote_pos,
+                result_id : result_id
             })
             .then(function (response) {
                 console.log('send_answer '.article_id + ' '+response.status)
                 if(response.status == 200) {
-                    question_list[question_pos]['is_answered'] = true
-                    question_pos+=1
-                    if (question_list >= item_sum ) {
-                        current_article_id = question_list[0]['article_id']
-                    } else {
-                        current_article_id = question_list[question_pos]['article_id']
+                    // 如果是新增的情形，當前的按鈕要改為"被回答過"，回答次數+1，更改內置文字
+                    if (result_id == null) {
+                        var current_btn = document.getElementsByClassName('question_btn')[question_pos]
+                        var current_qlist = question_list[question_pos]
+                        current_qlist['is_answered'] = true
+                        current_qlist.answer_time+=1
+                        current_btn.innerText = current_qlist['article_id']+ '(' + current_qlist['answer_time'] +')'
                     }
+                    // 更新題目內容
                     update_object(current_article_id)
                 } else {
                     alert('編碼錯誤')

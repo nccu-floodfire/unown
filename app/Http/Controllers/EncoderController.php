@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Encoder;
-use App\Result;
+use App\Article;
 
 class EncoderController extends Controller
 {
@@ -21,15 +21,16 @@ class EncoderController extends Controller
         if (is_null($encoder)) {
             abort(403, 'Encoder Not Exist.');
         }
-        $article_list = $encoder->getArticleList();
+        $article_list = Article::whereIn('id', $encoder->getArticleList())->orderBy('id')->get();
         if (sizeof($article_list) == 0) {
             abort(403, 'Objects Have not been Settled.');
         }
-        $result_list = Result::where('encoder_id', $encoder->id)->pluck('id')->toArray();
-        $question_list = array_map(function ($article_id) use ($result_list) {
-            return( ['article_id' => $article_id,
-                    'is_answered' => in_array($article_id, $result_list)] );
-        }, $article_list);
+
+        $question_list = $article_list->map(function ($article) use ($encoder) {
+            return( ['article_id' => $article->id,
+                    'is_answered' => $article->results->where('encoder_id', $encoder->id)->count()>0,
+                    'answer_time' => $article->results->where('encoder_id', $encoder->id)->count()] );
+        });
         return(view('answerSheet', compact('encoderUuid', 'question_list')));
     }
 }

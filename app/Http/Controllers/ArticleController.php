@@ -47,7 +47,7 @@ class ArticleController extends Controller
             ], 422);
         }
         $result = Result::where('encoder_id', $encoder->id)->
-                  where('page_id', $article->page_id)->first();
+                  where('page_id', $article->page_id)->get();
         $output = ['article' => $article,
                    'result' => $result];
                    
@@ -70,6 +70,7 @@ class ArticleController extends Controller
     public function answerOne(Request $request, $encoderUuid, $articleId)
     {
         $validator = Validator::make($request->all(), [
+            'result_id' => 'nullable|numeric',
             'quote_content' => 'nullable|string',
             'quote_origin' => 'nullable|string',
             'quote_actual' => 'nullable|string',
@@ -112,10 +113,8 @@ class ArticleController extends Controller
                 'message' => "Article Not Found"
             ], 422);
         }
-        $result = Result::where('encoder_id', $encoder->id)->
-                  where('page_id', $article->page_id)->first();
-        
-        if (is_null($result)) {
+
+        if (is_null($request->result_id)) {
             $result = new Result;
             $result->encoder_id = $encoder->id;
             $result->page_id = $article->page_id;
@@ -123,8 +122,10 @@ class ArticleController extends Controller
             $result->quote_origin = null;
             $result->quote_actual = null;
             $result->quote_pos = null;
+        } else {
+            $result = Result::where('encoder_id', $encoder->id)->
+            where('page_id', $article->page_id)->where('id', $request->result_id)->first();
         }
-
         $result->quote_content = $request->has('quote_content') ? $request->quote_content : $result->quote_content;
         $result->quote_origin = $request->has('quote_origin') ? $request->quote_origin : $result->quote_origin;
         $result->quote_actual = $request->has('quote_actual') ? $request->quote_actual : $result->quote_actual;
