@@ -8,6 +8,7 @@
         <title>EncodePage</title>
         <!-- Bootstrap CSS CDN -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+        <link rel="stylesheet" href="/css/mycss.css">
 
         <!-- Font Awesome JS -->
         <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
@@ -22,34 +23,48 @@
                     <div class="sidebar-header">
                         <h4>編碼題目列表</h4>
                     </div>
-
+                    <hr>
                     <ul class="list-unstyled components" id='bar_items'>
                     </ul>
                 </div>
                 <!-- Page Content -->
-                <div class="col-10" id = 'content'>
+                <div class="col-8"x id = 'content'>
                     <div class="form-group">
-                        <label >原始文章</label>
-                        <p class="text-left" id="origin">{原始文章顯示位置}</p>
-                        <button type="button" id='extract_btn1' onclick = "pick_quote()" class="btn btn-primary">擷取引述</button><br>
-                        <label >報導引述內容</label>
-                        <p class="text-left" id="quote_content">{引述顯示位置}</p>
-                        <button type="button" id='extract_btn2' onclick = "pick_source()" class="btn btn-primary">擷取消息來源</button><br>
-                        <label >消息來源名稱</label>
-                        <p class="text-left" id="quote_origin">{消息來源名稱}</p>
-                        <label >消息來源本名</label>
-                        <textarea class="form-control" rows="1" id="quote_actual" placeholder="{消息來源本名}"></textarea>
-                        <label >引述對象位置</label>
+                        <label class='mylabels'>・原始文章</label>
+                        <p class="text-left conetent_area" id="origin"></p>
+                        <div class='btn_area'><button type="button" id='extract_btn1' onclick = "pick_quote()" class="btn btn-primary">擷取引述</button></div>
+                        <label class='mylabels'>・報導引述內容</label>
+                        <p class="text-left conetent_area" id="quote_content"></p>
+                        <div class='btn_area'><button type="button" id='extract_btn2' onclick = "pick_source()" class="btn btn-primary">擷取消息來源</button></div>
+                        <label class='mylabels'>・消息來源名稱</label>
+                        <p class="text-left conetent_area" id="quote_origin"></p>
+                        <label class='mylabels'>・消息來源本名</label>
+                        <textarea class="form-control conetent_area" rows="1" id="quote_actual"></textarea>
+                        <label class='mylabels'>・引述對象位置</label>
+                        <br>
                         <label class="radio-inline"><input type="radio" name="optradio" value=0>0（切分單位前）</label>
                         <label class="radio-inline"><input type="radio" name="optradio" value=1>1（切分單位中）</label>
                         <label class="radio-inline"><input type="radio" name="optradio" value=2>2（切分單位後）</label>
                         <label class="radio-inline"><input type="radio" name="optradio" value=3 checked>無</label>
                     </div>
+                    <div class='btn_area'>
                     <button type="button" onclick = "send_result()" class="btn btn-primary" id = 'new_btn'>新增結果</button>
                     <button type="button" onclick = "update_result()" class="btn btn-primary" id = 'update_btn' style='display:none;'>修改結果</button>
-                    <br>
-                    <div id='current_result'>已有作答：</div>
-                    <div id="result_buttons">
+                    </div>
+                </div>
+                <div class="col-2" id = 'function_part'>
+                    <div id="function_search">
+                        <label class='mylabels'>搜尋定位</label>
+                        <textarea class="form-control conetent_area" rows="1" id="search_inside" placeholder="輸入標記文字"></textarea>
+                        <div class='btn_area'>
+                            <button type="button" class="btn btn-outline-info" onclick="search_key()">標記</button>
+                            <button type="button" class="btn btn-outline-info" onclick="clear_search()">清除標記</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div id="function_results">
+                        <div id='current_result' class='mylabels'>已有作答：</div>
+                        <div id="result_buttons"></div>
                     </div>
                 </div>
             </div>
@@ -130,7 +145,10 @@
                     while (button_area.firstChild) {
                         button_area.firstChild.remove()
                     }
+                    document.getElementById('update_btn').style.display = 'none'
                     result_idx = -1
+                    // 清空搜尋欄
+                    document.getElementById('search_inside').value = ''
 
                     if(current_item.result.length > 0) {
                         // 如果該題已經有回答過，則產生回答列表按鈕
@@ -154,19 +172,20 @@
             tmpbtn.type = 'button'
             tmpbtn.value = 0
             tmpbtn.classList.add('btn')
-            tmpbtn.classList.add('btn-warning')
-            tmpbtn.innerText = '清空'
+            tmpbtn.classList.add('btn-dark')
+            tmpbtn.innerText = '清空編碼欄'
             tmpbtn.setAttribute('onclick','fill_the_result(this);'); // for FF
             tmpbtn.onclick = function() {fill_the_result(this);}; // for IE
             button_area.appendChild(tmpbtn)
-
+            button_area.appendChild(document.createElement("br"))
             // 依序創建已回應的回應按鈕，以1開始
             for (var i = 0; i < results.length; i++) {
                 var tmpbtn = document.createElement("button");
                 tmpbtn.type = 'button'
                 tmpbtn.value = i+1
                 tmpbtn.classList.add('btn')
-                tmpbtn.classList.add('btn-warning')
+                tmpbtn.classList.add('btn-outline-secondary')
+                tmpbtn.classList.add('answer_btn')
                 tmpbtn.innerText = i+1
                 tmpbtn.setAttribute('onclick','fill_the_result(this);'); // for FF
                 tmpbtn.onclick = function() {fill_the_result(this);}; // for IE
@@ -176,6 +195,11 @@
 
         //根據按鈕替換當前的回答內容
         function fill_the_result(result_btn){
+            var answer_btn = document.getElementsByClassName('answer_btn')
+            if(result_idx>0) {
+                answer_btn[result_idx-1].classList.remove('btn-secondary')
+                answer_btn[result_idx-1].classList.add('btn-outline-secondary')
+            }
             result_idx = result_btn.value
             if(result_idx == 0){
                 //  清空按鈕
@@ -198,6 +222,8 @@
                 } else {
                     document.getElementsByName('optradio')[result['quote_pos']].checked = true
                 }
+                answer_btn[result_idx-1].classList.add('btn-secondary')
+                answer_btn[result_idx-1].classList.remove('btn-outline-secondary')
             }
         }
 
@@ -262,7 +288,7 @@
         function pick_quote() {
             var showarea = document.getElementById('quote_content')
             var parent_id = document.getSelection()['anchorNode']['parentElement'].id
-            if(parent_id == 'origin') {
+            if(parent_id == 'origin' || parent_id == '') {
                 var txt = document.getSelection().toString()
                 showarea.innerText = txt
             }
@@ -276,6 +302,21 @@
                 var txt = document.getSelection().toString()
                 showarea.innerText = txt
             }
+        }
+
+        function search_key() {
+            clear_search()
+            var text_area = document.getElementById('origin')
+            feature = document.getElementById('search_inside').value
+            if (feature!=''){
+                text_area.innerHTML = text_area.innerHTML.replace(RegExp(feature,"g"), 
+                                                              '<span class="spark">'+feature+'</span>')
+            }
+        }
+
+        function clear_search() {
+            var text_area = document.getElementById('origin')
+            text_area.innerText = current_item.article.body
         }
 
         </script>

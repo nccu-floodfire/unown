@@ -1,0 +1,93 @@
+body {
+    font-family: 'Nunito', sans-serif;
+}
+
+/*題目列*/
+#side_bar {
+    height: 100vh;
+    overflow-x: scroll;
+    text-align: center;
+    border: 0.5px solid #8B4513;
+    padding: 0;
+}
+
+/*非題目列部分的內容*/
+#content {
+    height: 100vh;
+    overflow-x: scroll;
+    border-top: 0.5px solid #8B4513;
+    border-bottom: 0.5px solid #8B4513;
+}
+
+#function_part {
+    height: 100vh;
+    overflow-x: scroll;
+    text-align: center;
+    border: 0.5px solid #8B4513;
+    padding: 0;
+}
+
+.has_answered {
+    color:#777777;
+}
+
+.answering {
+    background-color: #FFD700;
+    color:#800000;
+    border: 0.5px solid #8B4513;
+}
+
+hr {
+    border: 0.5px solid #8B4513;
+}
+
+/*放置各項內容的部分*/
+.conetent_area {
+    border: 0.5px solid #8B4513;
+    color:black;
+    padding-left:10px;
+    padding-right:10px;
+    background-color:white;
+}
+/*原始內容*/
+#origin{
+    height: 25vh;
+    overflow-x: scroll;    
+}
+/*引述*/
+#quote_content{
+    height: 30px;
+    color: #777777;
+    overflow-x: scroll;
+}
+/*引述來源*/
+#quote_origin{
+    height: 30px;
+    color: #777777;
+    overflow-x: scroll;
+}
+/*引述本名*/
+#quote_actual{
+    height: 30px;
+    overflow-x: scroll;
+}
+
+/*所有按鈕*/
+.btn_area{
+    text-align: center;
+}
+
+#function_search{
+    padding:3vh;
+    height:25vh;
+    overflow-x: scroll;
+}
+
+#search_inside{
+    margin-bottom:20px;
+}
+
+.spark{
+    background-color:yellow;
+    color:red;
+}
