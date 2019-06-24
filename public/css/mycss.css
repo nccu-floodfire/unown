@@ -43,7 +43,7 @@ hr {
 
 /*放置各項內容的部分*/
 .conetent_area {
-    border: 0.5px solid #8B4513;
+    border: 1px solid #8B4513;
     color:black;
     padding-left:10px;
     padding-right:10px;
