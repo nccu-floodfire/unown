@@ -92,7 +92,9 @@
         <script>
             function next_page() {
                 var access_token = document.getElementById('encoderinput').value;
-                url = '/'+access_token
+                // 原始路徑
+                var mainUrl = "{!! url('/') !!}";
+                url = mainUrl+'/'+access_token
                 window.location.href = url;
             }
         </script>

@@ -8,7 +8,7 @@
         <title>EncodePage</title>
         <!-- Bootstrap CSS CDN -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
-        <link rel="stylesheet" href="/css/mycss.css">
+        <link rel="stylesheet" href="{{ url('/css/mycss.css') }}">
 
         <!-- Font Awesome JS -->
         <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
@@ -71,6 +71,8 @@
         </div>       
 
        <script> 
+        // 原始路徑
+        var mainUrl = "{!! url('/') !!}";
         // 該編碼者代碼
         var encoderUuid = {!!json_encode($encoderUuid) !!};
         // 要回答的問題集
@@ -129,7 +131,7 @@
 
         //更新表單內容
         function update_object(article_id) {
-            axios.get('/api/encoders/'+encoderUuid+'/articles/'+article_id)
+            axios.get(mainUrl+'/api/encoders/'+encoderUuid+'/articles/'+article_id)
             .then(function (response) {
                 console.log('load_object '+article_id + ' '+response.status)
                 if(response.status == 200) {
@@ -254,7 +256,7 @@
                 quote_pos = null
             }
 
-            axios.post('/api/encoders/'+encoderUuid+'/articles/'+article_id, {
+            axios.post(mainUrl+'/api/encoders/'+encoderUuid+'/articles/'+article_id, {
                 //取得表單內容並送出
                 quote_content: quote_content,
                 quote_origin: quote_origin,
