@@ -15,6 +15,6 @@ class Result extends Model
 
     public function article()
     {
-        return $this->belongsTo('App\Article', 'page_id');
+        return $this->belongsTo('App\Article');
     }
 }

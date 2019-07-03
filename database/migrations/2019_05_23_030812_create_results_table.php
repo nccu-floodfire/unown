@@ -16,7 +16,7 @@ class CreateResultsTable extends Migration
         Schema::create('results', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('encoder_id')->index()->comment('填寫人編號');
-            $table->unsignedBigInteger('page_id')->index()->comment('文章編號');
+            $table->unsignedBigInteger('article_id')->index()->comment('文章編號');
             $table->text('quote_content')->comment('報導引述內容');
             $table->string('quote_origin', 128)->nullable()->comment('報導來源名稱');
             $table->string('quote_actual', 128)->nullable()->comment('報導來源本名');
