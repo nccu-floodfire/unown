@@ -43,13 +43,14 @@
                         <label class='mylabels'>・引述對象位置</label>
                         <br>
                         <label class="radio-inline"><input type="radio" name="optradio" value=0><span style='margin-left:5pt;'>0（切分單位前）</span></label>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=1><span style='margin-left:5pt;'>1（切分單位中）</span></label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=1 checked><span style='margin-left:5pt;'>1（切分單位中）</span></label>
                         <label class="radio-inline"><input type="radio" name="optradio" value=2><span style='margin-left:5pt;'>2（切分單位後）</span></label>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=3 checked><span style='margin-left:5pt;'>無</span></label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=3><span style='margin-left:5pt;'>無</span></label>
                     </div>
                     <div class='btn_area'>
                     <button type="button" onclick = "send_result()" class="btn btn-primary" id = 'new_btn'>新增結果</button>
                     <button type="button" onclick = "update_result()" class="btn btn-primary" id = 'update_btn' style='display:none;'>修改結果</button>
+                    <button type="button" onclick = "delete_result()" class="btn btn-danger" id = 'delete_btn' style='display:none;'>刪除結果</button>
                     </div>
                 </div>
                 <div class="col-2" id = 'function_part'>
@@ -85,6 +86,7 @@
         var current_item = null
         // 當前回應是回應集的哪一個位置
         var result_idx = -1
+        var quote_index_pos = [-1, -1, -1, -1]
 
         window.onload = function () {
             var items = document.getElementById('bar_items')
@@ -114,6 +116,7 @@
                 question_pos = 0
             }
             // 載入題目
+            document.getElementById('origin').scrollTop = 0;
             current_article_id = question_list[question_pos]['article_id']
             update_object(current_article_id)
         }
@@ -126,6 +129,8 @@
             current_btn = document.getElementsByClassName('question_btn')[question_pos]
             current_btn.classList.add('answering')
             current_article_id = question_list[question_pos]['article_id']
+            //新的一題，要滾回最上面
+            document.getElementById('origin').scrollTop = 0;
             update_object(current_article_id)
         }
 
@@ -141,13 +146,15 @@
                     document.getElementById('quote_content').innerText = ''
                     document.getElementById('quote_origin').innerText = ''
                     document.getElementById('quote_actual').value = ''
-                    document.getElementsByName('optradio')['3'].checked = true
+                    document.getElementsByName('optradio')['1'].checked = true
+                    quote_index_pos = [-1, -1, -1, -1]
                     // 清空回應列+回應指標歸-1
                     var button_area = document.getElementById('result_buttons')
                     while (button_area.firstChild) {
                         button_area.firstChild.remove()
                     }
                     document.getElementById('update_btn').style.display = 'none'
+                    document.getElementById('delete_btn').style.display = 'none'
                     result_idx = -1
                     // 清空搜尋欄
                     document.getElementById('search_inside').value = ''
@@ -207,19 +214,26 @@
             if(result_idx == 0){
                 //  清空按鈕
                 document.getElementById('update_btn').style.display = 'none'
+                document.getElementById('delete_btn').style.display = 'none'
                 document.getElementById('current_result').innerText = '已有作答：'
                 document.getElementById('quote_content').innerText = ''
                 document.getElementById('quote_origin').innerText = ''
                 document.getElementById('quote_actual').value = ''
-                document.getElementsByName('optradio')['3'].checked = true
+                document.getElementsByName('optradio')['1'].checked = true
+                quote_index_pos = [-1, -1, -1, -1]
             } else {
                 //  匯入回應內容
                 document.getElementById('update_btn').style.display = ''
+                document.getElementById('delete_btn').style.display = ''
                 document.getElementById('current_result').innerText = '已有作答：(當前匯入'+result_idx+'）'
                 var result = current_item.result[result_idx-1] // 因為從1開始，故需要減少1才會是array的位置
                 document.getElementById('quote_content').innerText = result['quote_content']
                 document.getElementById('quote_origin').innerText = result['quote_origin']
                 document.getElementById('quote_actual').value = result['quote_actual']
+                quote_index_pos = result['note']
+                if (quote_index_pos == null) {
+                    quote_index_pos = [-1, -1, -1, -1]
+                }
                 if (result['quote_pos'] == 3 || result['quote_pos'] == null) {
                     document.getElementsByName('optradio')['3'].checked = true
                 } else {
@@ -240,8 +254,41 @@
             send_answer(question_list[question_pos].article_id, current_item.result[result_idx-1].id)
         }
 
+        //刪除一個結果
+        function delete_result(){
+            result_id = current_item.result[result_idx-1].id
+            axios.delete(baseURL+'/api/encoders/'+encoderUuid+'/result/'+result_id, {
+            })
+            .then(function (response) {
+                console.log('delete_answer '.result_id + ' '+response.status)
+                if(response.status == 200) {
+                    // 回答次數-1，更改內置文字，如果歸零，當前的按鈕要改為"未被回答過"
+                    var current_btn = document.getElementsByClassName('question_btn')[question_pos]
+                    var current_qlist = question_list[question_pos]
+                    current_qlist.answer_time-=1
+                    current_btn.innerText = current_qlist['article_id']+ '(' + current_qlist['answer_time'] +')'
+                    if (current_qlist.answer_time ==0) {
+                        current_qlist['is_answered'] = false
+                    }
+                    // 更新題目內容
+                    update_object(current_article_id)
+                } else {
+                    alert('刪除錯誤')
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+        }
+
         //新增or修改一筆結果
         function send_answer(article_id, result_id) {
+            if (quote_index_pos[2]<quote_index_pos[0] || quote_index_pos[3]>quote_index_pos[1]){
+                if (quote_index_pos[2]!=-1 || quote_index_pos[3]!=-1){
+                    alert('消息來源不在報導引數內，請再確認一下')
+                    return false
+                }
+            }
             var quote_content = document.getElementById('quote_content').innerText
             var quote_origin = document.getElementById('quote_origin').innerText
             var quote_actual = document.getElementById('quote_actual').value
@@ -263,7 +310,8 @@
                 quote_origin: quote_origin,
                 quote_actual: quote_actual,
                 quote_pos : quote_pos,
-                result_id : result_id
+                result_id : result_id,
+                note : quote_index_pos
             })
             .then(function (response) {
                 console.log('send_answer '.article_id + ' '+response.status)
@@ -291,9 +339,30 @@
         function pick_quote() {
             var showarea = document.getElementById('quote_content')
             var parent_id = document.getSelection()['anchorNode']['parentElement'].id
-            if(parent_id == 'origin' || parent_id == '') {
-                var txt = document.getSelection().toString()
-                showarea.innerText = txt
+            target_parent_id = 'origin'
+            if(parent_id == target_parent_id || parent_id == '') {
+                var all_text = document.getElementById(target_parent_id).innerText
+                //段落開頭
+                var pstart = all_text.indexOf(window.getSelection().baseNode.data)
+                //段落offset
+                var poffset = window.getSelection().baseOffset
+                //開始位置
+                var start_pos = pstart+poffset
+                //選取長度
+                var select_length = window.getSelection().toString().length
+                //結束位置
+                var end_pos = start_pos + select_length
+                //重新確認取得文字
+                var checked_pick_content = document.getElementById(target_parent_id).innerText.substring(start_pos, end_pos)
+                //重新確認結束位置(避免超出選取)
+                var new_end_pos = start_pos + checked_pick_content.length
+                //最終確認取得文字
+                var final_content = document.getElementById(target_parent_id).innerText.substring(start_pos, new_end_pos)                
+                showarea.innerText = final_content
+                if (final_content.length > 0) {
+                    quote_index_pos[0] = start_pos
+                    quote_index_pos[1] = new_end_pos
+                }
             }
         }
 
@@ -301,9 +370,30 @@
         function pick_source() {
             var showarea = document.getElementById('quote_origin')
             var parent_id = document.getSelection()['anchorNode']['parentElement'].id
-            if(parent_id == 'quote_content') {
-                var txt = document.getSelection().toString()
-                showarea.innerText = txt
+            target_parent_id = 'quote_content'
+            if(parent_id == target_parent_id) {
+                var all_text = document.getElementById(target_parent_id).innerText
+                //段落開頭
+                var pstart = all_text.indexOf(window.getSelection().baseNode.data)
+                //段落offset
+                var poffset = window.getSelection().baseOffset
+                //開始位置
+                var start_pos = pstart+poffset
+                //選取長度
+                var select_length = window.getSelection().toString().length
+                //結束位置
+                var end_pos = start_pos + select_length
+                //重新確認取得文字
+                var checked_pick_content = document.getElementById(target_parent_id).innerText.substring(start_pos, end_pos)
+                //重新確認結束位置(避免超出選取)
+                var new_end_pos = start_pos + checked_pick_content.length
+                //最終確認取得文字
+                var final_content = document.getElementById(target_parent_id).innerText.substring(start_pos, new_end_pos)
+                showarea.innerText = final_content
+                if (final_content.length > 0) {
+                    quote_index_pos[2] = quote_index_pos[0]+start_pos
+                    quote_index_pos[3] = quote_index_pos[0]+new_end_pos
+                }
             }
         }
 

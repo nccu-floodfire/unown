@@ -46,7 +46,7 @@ class ArticleController extends Controller
                 'message' => "Article Not Found"
             ], 422);
         }
-        $result = $encoder->results->where('article_id', $articleId);
+        $result = array_values($encoder->results->where('article_id', $articleId)->toArray());
         $output = ['article' => $article,
                    'result' => $result];
                    
@@ -77,6 +77,7 @@ class ArticleController extends Controller
                 'nullable',
                 Rule::in(['0','1','2'])
             ],
+            'note' => 'nullable|array|max:32',
         ]);
 
         if ($validator->fails()) {
@@ -129,11 +130,42 @@ class ArticleController extends Controller
         $result->quote_origin = $request->has('quote_origin') ? $request->quote_origin : $result->quote_origin;
         $result->quote_actual = $request->has('quote_actual') ? $request->quote_actual : $result->quote_actual;
         $result->quote_pos = $request->has('quote_pos') ? $request->quote_pos : $result->quote_pos;
+        $result->note = $request->has('note') ? $request->note : $result->note;
         $result->save();
 
         $response['status'] = 201;
         $response['type'] = 'success';
         $response['message'] = 'Article ' . $articleId . ' has been asnwered.';
+
+        return($response);
+    }
+
+    /**
+     * 刪除某一個回答
+     *
+     * @param Request $request
+     * @param integer $encoderUuid
+     * @param integer $articleId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteOne(Request $request, $encoderUuid, $resultId)
+    {
+        $encoder = Encoder::where('access_token', $encoderUuid)->first();
+        if (is_null($encoder)) {
+            return response()->json([
+                'status' => 422,
+                'type' => 'error',
+                'message' => "User Not Found"
+            ], 422);
+        }
+        $result = $encoder->results->
+                    where('id', $resultId)->first();
+
+        $result->delete();
+
+        $response['status'] = 201;
+        $response['type'] = 'success';
+        $response['message'] = 'Result ' . $resultId . ' has been deleted.';
 
         return($response);
     }

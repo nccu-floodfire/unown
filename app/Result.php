@@ -8,6 +8,10 @@ class Result extends Model
 {
     public $timestamps = false;
 
+    protected $casts = [
+        'note' => 'array',
+    ];
+
     public function encoder()
     {
         return $this->belongsTo('App\Encoder');
