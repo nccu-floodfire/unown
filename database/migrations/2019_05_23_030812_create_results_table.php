@@ -21,6 +21,7 @@ class CreateResultsTable extends Migration
             $table->string('quote_origin', 128)->nullable()->comment('報導來源名稱');
             $table->string('quote_actual', 128)->nullable()->comment('報導來源本名');
             $table->enum('quote_pos', ['0', '1', '2'])->nullable()->comment('引述對象位置');
+            $table->string('note', 32)->default('[-1,-1,-1,-1]')->comment('引述備註');
         });
     }
 

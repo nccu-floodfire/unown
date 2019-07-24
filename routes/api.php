@@ -19,3 +19,4 @@ use Illuminate\Http\Request;
 
 Route::get('encoders/{encoderUuid}/articles/{articleId}', 'ArticleController@getOne');
 Route::post('encoders/{encoderUuid}/articles/{articleId}', 'ArticleController@answerOne');
+Route::delete('encoders/{encoderUuid}/result/{resultId}', 'ArticleController@deleteOne');

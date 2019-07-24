@@ -5,7 +5,8 @@ body {
 /*題目列*/
 #side_bar {
     height: 100vh;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
     text-align: center;
     border: 0.5px solid #8B4513;
     padding: 0;
@@ -17,14 +18,16 @@ body {
     background-color: rgb(245, 238, 209);
     padding-top: 5vh;
     height: 100vh;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
     border-top: 0.5px solid #8B4513;
     border-bottom: 0.5px solid #8B4513;
 }
 
 #function_part {
     height: 100vh;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
     text-align: center;
     border: 0.5px solid #8B4513;
     padding: 0;
@@ -61,24 +64,28 @@ hr {
 /*原始內容*/
 #origin{
     height: 25vh;
-    overflow-x: scroll;    
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 /*引述*/
 #quote_content{
-    height: 30px;
+    height: 40px;
     color: #777777;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 /*引述來源*/
 #quote_origin{
-    height: 30px;
+    height: 40px;
     color: #777777;
-    overflow-x: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 /*引述本名*/
 #quote_actual{
-    height: 30px;
-    overflow-x: scroll;
+    height: 40px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /*所有按鈕*/
