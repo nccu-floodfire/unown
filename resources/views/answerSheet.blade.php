@@ -8,7 +8,7 @@
         <title>EncodePage</title>
         <!-- Bootstrap CSS CDN -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
-        <link rel="stylesheet" href="/css/mycss.css">
+        <link rel="stylesheet" href="{{ url('/css/mycss.css') }}">
 
         <!-- Font Awesome JS -->
         <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
@@ -42,10 +42,10 @@
                         <textarea class="form-control conetent_area" rows="1" id="quote_actual"></textarea>
                         <label class='mylabels'>・引述對象位置</label>
                         <br>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=0>0（切分單位前）</label>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=1>1（切分單位中）</label>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=2>2（切分單位後）</label>
-                        <label class="radio-inline"><input type="radio" name="optradio" value=3 checked>無</label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=0><span style='margin-left:5pt;'>0（切分單位前）</span></label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=1><span style='margin-left:5pt;'>1（切分單位中）</span></label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=2><span style='margin-left:5pt;'>2（切分單位後）</span></label>
+                        <label class="radio-inline"><input type="radio" name="optradio" value=3 checked><span style='margin-left:5pt;'>無</span></label>
                     </div>
                     <div class='btn_area'>
                     <button type="button" onclick = "send_result()" class="btn btn-primary" id = 'new_btn'>新增結果</button>
@@ -54,11 +54,11 @@
                 </div>
                 <div class="col-2" id = 'function_part'>
                     <div id="function_search">
-                        <label class='mylabels'>搜尋定位</label>
+                        <label class='mylabels'>標記定位</label>
                         <textarea class="form-control conetent_area" rows="1" id="search_inside" placeholder="輸入標記文字"></textarea>
                         <div class='btn_area'>
-                            <button type="button" class="btn btn-outline-info" onclick="search_key()">標記</button>
-                            <button type="button" class="btn btn-outline-info" onclick="clear_search()">清除標記</button>
+                            <button type="button" class="btn btn-danger" onclick="search_key()">標記</button>
+                            <button type="button" class="btn btn-danger" onclick="clear_search()">清除標記</button>
                         </div>
                     </div>
                     <hr>
@@ -71,6 +71,8 @@
         </div>       
 
        <script> 
+        // 原始路徑
+        var baseURL = "{!! url('/') !!}";
         // 該編碼者代碼
         var encoderUuid = {!!json_encode($encoderUuid) !!};
         // 要回答的問題集
@@ -129,7 +131,7 @@
 
         //更新表單內容
         function update_object(article_id) {
-            axios.get('/api/encoders/'+encoderUuid+'/articles/'+article_id)
+            axios.get(baseURL+'/api/encoders/'+encoderUuid+'/articles/'+article_id)
             .then(function (response) {
                 console.log('load_object '+article_id + ' '+response.status)
                 if(response.status == 200) {
@@ -173,6 +175,7 @@
             tmpbtn.value = 0
             tmpbtn.classList.add('btn')
             tmpbtn.classList.add('btn-dark')
+            tmpbtn.classList.add('clean-answer-btn')
             tmpbtn.innerText = '清空編碼欄'
             tmpbtn.setAttribute('onclick','fill_the_result(this);'); // for FF
             tmpbtn.onclick = function() {fill_the_result(this);}; // for IE
@@ -184,7 +187,7 @@
                 tmpbtn.type = 'button'
                 tmpbtn.value = i+1
                 tmpbtn.classList.add('btn')
-                tmpbtn.classList.add('btn-outline-secondary')
+                tmpbtn.classList.add('btn-outline-dark')
                 tmpbtn.classList.add('answer_btn')
                 tmpbtn.innerText = i+1
                 tmpbtn.setAttribute('onclick','fill_the_result(this);'); // for FF
@@ -197,8 +200,8 @@
         function fill_the_result(result_btn){
             var answer_btn = document.getElementsByClassName('answer_btn')
             if(result_idx>0) {
-                answer_btn[result_idx-1].classList.remove('btn-secondary')
-                answer_btn[result_idx-1].classList.add('btn-outline-secondary')
+                answer_btn[result_idx-1].classList.remove('btn-dark')
+                answer_btn[result_idx-1].classList.add('btn-outline-dark')
             }
             result_idx = result_btn.value
             if(result_idx == 0){
@@ -222,8 +225,8 @@
                 } else {
                     document.getElementsByName('optradio')[result['quote_pos']].checked = true
                 }
-                answer_btn[result_idx-1].classList.add('btn-secondary')
-                answer_btn[result_idx-1].classList.remove('btn-outline-secondary')
+                answer_btn[result_idx-1].classList.add('btn-dark')
+                answer_btn[result_idx-1].classList.remove('btn-outline-dark')
             }
         }
 
@@ -254,7 +257,7 @@
                 quote_pos = null
             }
 
-            axios.post('/api/encoders/'+encoderUuid+'/articles/'+article_id, {
+            axios.post(baseURL+'/api/encoders/'+encoderUuid+'/articles/'+article_id, {
                 //取得表單內容並送出
                 quote_content: quote_content,
                 quote_origin: quote_origin,

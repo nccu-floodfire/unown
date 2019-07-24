@@ -9,10 +9,13 @@ body {
     text-align: center;
     border: 0.5px solid #8B4513;
     padding: 0;
+    background-color: rgb(179, 219, 238);
 }
 
 /*非題目列部分的內容*/
 #content {
+    background-color: rgb(245, 238, 209);
+    padding-top: 5vh;
     height: 100vh;
     overflow-x: scroll;
     border-top: 0.5px solid #8B4513;
@@ -25,6 +28,11 @@ body {
     text-align: center;
     border: 0.5px solid #8B4513;
     padding: 0;
+    background-color: rgb(219, 157, 154);
+}
+
+.clean-answer-btn{
+    margin:3vh;
 }
 
 .has_answered {
@@ -47,6 +55,7 @@ hr {
     color:black;
     padding-left:10px;
     padding-right:10px;
+    margin-bottom:10px;
     background-color:white;
 }
 /*原始內容*/
@@ -74,6 +83,7 @@ hr {
 
 /*所有按鈕*/
 .btn_area{
+    margin-top: 30px;
     text-align: center;
 }
 

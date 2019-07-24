@@ -14,7 +14,7 @@
         <!-- Styles -->
         <style>
             html, body {
-                background-color: #F0E68C;
+                background-color: rgb(245, 238, 209);
                 color: #8B4513;
                 font-family: 'Nunito', sans-serif;
                 font-weight: 200;
@@ -92,7 +92,9 @@
         <script>
             function next_page() {
                 var access_token = document.getElementById('encoderinput').value;
-                url = '/'+access_token
+                // 原始路徑
+                var baseURL = "{!! url('/') !!}";
+                url = baseURL+'/'+access_token
                 window.location.href = url;
             }
         </script>

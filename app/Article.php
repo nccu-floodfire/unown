@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
-    protected $primaryKey = 'page_id'; //設定Primary Key
     public $incrementing = false;
     public $timestamps = false;
 
@@ -17,6 +16,6 @@ class Article extends Model
      */
     public function results()
     {
-        return $this->hasMany('App\Result', 'page_id');
+        return $this->hasMany('App\Result');
     }
 }

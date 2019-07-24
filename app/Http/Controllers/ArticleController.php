@@ -46,8 +46,7 @@ class ArticleController extends Controller
                 'message' => "Article Not Found"
             ], 422);
         }
-        $result = Result::where('encoder_id', $encoder->id)->
-                  where('page_id', $article->page_id)->get();
+        $result = $encoder->results->where('article_id', $articleId);
         $output = ['article' => $article,
                    'result' => $result];
                    
@@ -117,14 +116,14 @@ class ArticleController extends Controller
         if (is_null($request->result_id)) {
             $result = new Result;
             $result->encoder_id = $encoder->id;
-            $result->page_id = $article->page_id;
+            $result->article_id = $articleId;
             $result->quote_content = null;
             $result->quote_origin = null;
             $result->quote_actual = null;
             $result->quote_pos = null;
         } else {
-            $result = Result::where('encoder_id', $encoder->id)->
-            where('page_id', $article->page_id)->where('id', $request->result_id)->first();
+            $result = $encoder->results->where('article_id', $articleId)->
+                      where('id', $request->result_id)->first();
         }
         $result->quote_content = $request->has('quote_content') ? $request->quote_content : $result->quote_content;
         $result->quote_origin = $request->has('quote_origin') ? $request->quote_origin : $result->quote_origin;

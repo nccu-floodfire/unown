@@ -14,7 +14,7 @@ class ResultSeeder extends Seeder
     {
         $rs = new Result;
         $rs->encoder_id = 1;
-        $rs->page_id = 379994;
+        $rs->article_id = 1;
         $rs->quote_content = 'test';
         $rs->save();
     }
