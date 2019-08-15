@@ -147,6 +147,7 @@
                     document.getElementById('quote_origin').innerText = ''
                     document.getElementById('quote_actual').value = ''
                     document.getElementsByName('optradio')['1'].checked = true
+                    document.getElementById('current_result').innerText = '已有作答：'
                     quote_index_pos = [-1, -1, -1, -1]
                     // 清空回應列+回應指標歸-1
                     var button_area = document.getElementById('result_buttons')
