@@ -38,7 +38,7 @@
                         <div class='btn_area'><button type="button" id='extract_btn2' onclick = "pick_source()" class="btn btn-primary">擷取消息來源</button></div>
                         <label class='mylabels'>・消息來源名稱</label>
                         <p class="text-left conetent_area" id="quote_origin"></p>
-                        <label class='mylabels'>・消息來源本名</label>
+                        <label class='mylabels'>・文章內首次出現名稱</label>
                         <textarea class="form-control conetent_area" rows="1" id="quote_actual"></textarea>
                         <label class='mylabels'>・引述對象位置</label>
                         <br>
@@ -285,7 +285,7 @@
         function send_answer(article_id, result_id) {
             if (quote_index_pos[2]<quote_index_pos[0] || quote_index_pos[3]>quote_index_pos[1]){
                 if (quote_index_pos[2]!=-1 || quote_index_pos[3]!=-1){
-                    alert('消息來源不在報導引數內，請再確認一下')
+                    alert('消息來源不在報導引述內，請再確認一下')
                     return false
                 }
             }
