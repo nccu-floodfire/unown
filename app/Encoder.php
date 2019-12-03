@@ -40,7 +40,7 @@ class Encoder extends Model
         $output_list = array();
         foreach (explode(',', $article_list) as $range) {
             if (strpos($range, ':') !== false) {
-                $output_list += range(explode(':', $range)[0], explode(':', $range)[1]);
+                $output_list = array_merge($output_list, range(explode(':', $range)[0], explode(':', $range)[1]));
             } else {
                 array_push($output_list, intval($range));
             }
